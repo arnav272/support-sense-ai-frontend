@@ -3,6 +3,13 @@ import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from
 import TicketDetail from './components/TicketDetail'
 import Analytics from './components/Analytics'
 
+// Import config
+const config = {
+  apiUrl: import.meta.env.PROD 
+    ? 'https://support-sense-ai-backend.onrender.com'
+    : 'http://localhost:8001'
+}
+
 // Create Dark Mode Context
 const DarkModeContext = createContext()
 
@@ -13,36 +20,27 @@ function DarkModeProvider({ children }) {
     return saved ? JSON.parse(saved) : false
   })
 
- // useEffect(() => {
- //   localStorage.setItem('darkMode', JSON.stringify(darkMode))
- //   if (darkMode) {
-   //   document.documentElement.classList.add('dark')
-  ///  } else {
-   //   document.documentElement.classList.remove('dark')
-  //  }
- // }, [darkMode])
-
   const toggleDarkMode = () => {
-  console.log('🔄 BEFORE toggle - darkMode:', darkMode)
-  const newDarkMode = !darkMode
-  console.log('🔄 AFTER toggle calculation - newDarkMode:', newDarkMode)
-  
-  // Update localStorage
-  localStorage.setItem('darkMode', JSON.stringify(newDarkMode))
-  
-  // Update class immediately
-  if (newDarkMode) {
-    console.log('🌙 Adding dark class')
-    document.documentElement.classList.add('dark')
-  } else {
-    console.log('☀️ Removing dark class')  
-    document.documentElement.classList.remove('dark')
+    console.log('🔄 BEFORE toggle - darkMode:', darkMode)
+    const newDarkMode = !darkMode
+    console.log('🔄 AFTER toggle calculation - newDarkMode:', newDarkMode)
+    
+    // Update localStorage
+    localStorage.setItem('darkMode', JSON.stringify(newDarkMode))
+    
+    // Update class immediately
+    if (newDarkMode) {
+      console.log('🌙 Adding dark class')
+      document.documentElement.classList.add('dark')
+    } else {
+      console.log('☀️ Removing dark class')  
+      document.documentElement.classList.remove('dark')
+    }
+    
+    // Update state
+    console.log('🎯 Setting state to:', newDarkMode)
+    setDarkMode(newDarkMode)
   }
-  
-  // Update state
-  console.log('🎯 Setting state to:', newDarkMode)
-  setDarkMode(newDarkMode)
-}
 
   return (
     <DarkModeContext.Provider value={{ darkMode, toggleDarkMode }}>
@@ -60,7 +58,7 @@ function useDarkMode() {
   return context
 }
 
-// Dashboard Component - KEEP EVERYTHING ELSE EXACTLY THE SAME
+// Dashboard Component
 function Dashboard() {
   const [tickets, setTickets] = useState([])
   const [loading, setLoading] = useState(true)
@@ -70,12 +68,11 @@ function Dashboard() {
   const navigate = useNavigate()
   const { darkMode, toggleDarkMode } = useDarkMode()
 
-  // ... REST OF YOUR EXACT DASHBOARD CODE - DON'T CHANGE ANYTHING
   // Function to fetch tickets
   const fetchTickets = async () => {
     setLoading(true)
     try {
-      const response = await fetch('http://localhost:8001/api/tickets')
+      const response = await fetch(`${config.apiUrl}/api/tickets`)
       const data = await response.json()
       setTickets(data)
     } catch (error) {
@@ -108,7 +105,7 @@ function Dashboard() {
     for (let i = 0; i < 5; i++) {
       const randomText = scenarios[Math.floor(Math.random() * scenarios.length)];
       try {
-        await fetch('http://localhost:8001/api/tickets', {
+        await fetch(`${config.apiUrl}/api/tickets`, {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({ text: randomText, source: 'demo' })
@@ -213,9 +210,6 @@ function Dashboard() {
               >
                 Analytics
               </button>
-
-              {/* Dark Mode Toggle - DEBUG VERSION */}
-
 
               {/* Demo Data Generator */}
               <button
@@ -506,7 +500,7 @@ function AnalyticsWrapper() {
   const { darkMode, toggleDarkMode } = useDarkMode()
 
   useEffect(() => {
-    fetch('http://localhost:8001/api/tickets')
+    fetch(`${config.apiUrl}/api/tickets`)
       .then(response => response.json())
       .then(data => {
         setTickets(data)

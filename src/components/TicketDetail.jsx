@@ -1,6 +1,13 @@
 import React, { useState } from 'react'
 import Modal from './Modal'
 
+// Import config
+const config = {
+  apiUrl: import.meta.env.PROD 
+    ? 'https://support-sense-ai-backend.onrender.com'
+    : 'http://localhost:8001'
+}
+
 function TicketDetail({ ticket, onBack, darkMode, toggleDarkMode }) {
   const [response, setResponse] = useState('')
   const [status, setStatus] = useState(ticket.status)
@@ -21,7 +28,7 @@ function TicketDetail({ ticket, onBack, darkMode, toggleDarkMode }) {
   const updateTicketInBackend = async (updates) => {
     try {
       console.log('Updating ticket with:', updates)
-      const response = await fetch(`http://localhost:8001/api/tickets/${ticket.id}`, {
+      const response = await fetch(`${config.apiUrl}/api/tickets/${ticket.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -58,7 +65,7 @@ function TicketDetail({ ticket, onBack, darkMode, toggleDarkMode }) {
   const handleAiSuggestion = async () => {
     setIsGenerating(true)
     try {
-      const response = await fetch('http://localhost:8001/api/ai/suggest-response', {
+      const response = await fetch(`${config.apiUrl}/api/ai/suggest-response`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
